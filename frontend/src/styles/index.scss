@@ -1,0 +1,90 @@
+:root {
+  --bg: #0b1020;
+  --text: #e6e6e6;
+  --muted: #9aa4b2;
+  --card: #11182a;
+  --accent: #6aa1ff;
+  --border: #23314d;
+}
+
+.light {
+  --bg: #ffffff;
+  --text: #111111;
+  --muted: #5f6670;
+  --card: #f6f7f9;
+  --accent: #2f6dff;
+  --border: #e5e7eb;
+}
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji; }
+
+button { cursor: pointer; }
+
+.container {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  height: 100%;
+}
+
+@media (max-width: 960px) {
+  .content { grid-template-columns: 0 1fr; }
+}
+
+.sidebar {
+  border-right: 1px solid var(--border);
+  background: var(--card);
+  overflow: hidden;
+}
+
+.sidebarInner {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebarHeader { padding: 10px; display: flex; gap: 8px; }
+.sidebarList { flex: 1; overflow: auto; padding: 8px; }
+.sidebarFooter { padding: 12px; border-top: 1px solid var(--border); }
+
+.chatArea { display: grid; grid-template-rows: 1fr auto; height: 100%; }
+.messages { padding: 12px; overflow: auto; }
+.inputBar { display: flex; gap: 8px; border-top: 1px solid var(--border); padding: 10px; background: var(--card); }
+.inputBar input[type="text"] { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text); }
+
+.iconBtn { background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; }
+.primaryBtn { background: var(--accent); color: white; border: 0; border-radius: 8px; padding: 8px 12px; }
+.ghostBtn { background: transparent; color: var(--text); border: 0; padding: 6px 8px; }
+
+.toolbarRight { display: flex; align-items: center; gap: 8px; }
+.helpWrap { position: relative; }
+.tooltip { position: absolute; right: 0; top: 120%; background: var(--card); border: 1px solid var(--border); padding: 8px 10px; border-radius: 8px; width: 260px; color: var(--muted); box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+
+.topLeftMenu { position: absolute; left: 10px; top: 10px; z-index: 2; }
+.modeMenu { position: relative; }
+.modeList { position: absolute; top: 36px; left: 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px; width: 220px; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+.modeItem { padding: 8px; border-radius: 6px; }
+.modeItem:hover { background: rgba(255,255,255,0.06); }
+
+.webSearchBtn { position: absolute; right: 16px; bottom: 86px; }
+
+@media (max-width: 960px) {
+  .webSearchBtn { position: static; margin: 8px 12px; }
+}
