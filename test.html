@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Interface Test</title>
+    <style>
+        :root {
+            --bg: #0b1020;
+            --text: #e6e6e6;
+            --muted: #9aa4b2;
+            --card: #11182a;
+            --accent: #6aa1ff;
+            --border: #23314d;
+        }
+
+        .light {
+            --bg: #ffffff;
+            --text: #111111;
+            --muted: #5f6670;
+            --card: #f6f7f9;
+            --accent: #2f6dff;
+            --border: #e5e7eb;
+        }
+
+        * { box-sizing: border-box; }
+        html, body { height: 100%; margin: 0; background: var(--bg); color: var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Helvetica, Arial; }
+
+        .container {
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            height: 100%;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-bottom: 1px solid var(--border);
+            background: var(--card);
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            height: 100%;
+        }
+
+        @media (max-width: 960px) {
+            .content { grid-template-columns: 0 1fr; }
+        }
+
+        .sidebar {
+            border-right: 1px solid var(--border);
+            background: var(--card);
+            overflow: hidden;
+        }
+
+        .sidebarInner {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebarHeader { padding: 10px; display: flex; gap: 8px; }
+        .sidebarList { flex: 1; overflow: auto; padding: 8px; }
+        .sidebarFooter { padding: 12px; border-top: 1px solid var(--border); }
+
+        .chatArea { 
+            display: grid; 
+            grid-template-rows: 1fr auto; 
+            height: 100%; 
+            position: relative;
+        }
+
+        .messages { padding: 12px; overflow: auto; }
+        
+        .inputBar { 
+            display: flex; 
+            gap: 8px; 
+            border-top: 1px solid var(--border); 
+            padding: 10px; 
+            background: var(--card); 
+            position: relative;
+        }
+
+        .inputBar.centered {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-top: none;
+            background: transparent;
+            padding: 0;
+        }
+
+        .inputContainer {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 8px 12px;
+            min-height: 56px;
+        }
+
+        .inputContainer input[type="text"] {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--text);
+            outline: none;
+            padding: 8px 12px;
+            font-size: 16px;
+        }
+
+        .inputContainer input[type="text"]::placeholder {
+            color: var(--muted);
+        }
+
+        .inputButtons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 8px;
+        }
+
+        .inputButton {
+            background: transparent;
+            border: none;
+            color: var(--muted);
+            padding: 8px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .inputButton:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text);
+        }
+
+        .inputButton.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        .sendButton {
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 8px;
+        }
+
+        .sendButton:hover {
+            background: #5a8eff;
+        }
+
+        .sendButton:disabled {
+            background: var(--muted);
+            cursor: not-allowed;
+        }
+
+        .iconBtn { background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; }
+        .primaryBtn { background: var(--accent); color: white; border: 0; border-radius: 8px; padding: 8px 12px; }
+        .ghostBtn { background: transparent; color: var(--text); border: 0; padding: 6px 8px; }
+
+        .toolbarRight { display: flex; align-items: center; gap: 8px; }
+        .helpWrap { position: relative; }
+        .tooltip { position: absolute; right: 0; top: 120%; background: var(--card); border: 1px solid var(--border); padding: 8px 10px; border-radius: 8px; width: 260px; color: var(--muted); box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+
+        .topLeftMenu { position: absolute; left: 10px; top: 10px; z-index: 2; }
+        .modeMenu { position: relative; }
+        .modeList { position: absolute; top: 36px; left: 0; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 6px; width: 220px; box-shadow: 0 6px 20px rgba(0,0,0,.2); }
+        .modeItem { padding: 8px; border-radius: 6px; }
+        .modeItem:hover { background: rgba(255,255,255,0.06); }
+
+        .webSearchToggle { 
+            position: absolute; 
+            right: 16px; 
+            bottom: 16px; 
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .webSearchToggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .webSearchToggle.active {
+            background: var(--accent);
+            color: white;
+        }
+
+        @media (max-width: 960px) {
+            .webSearchToggle { 
+                position: static; 
+                margin: 8px 12px; 
+                border-radius: 8px;
+                padding: 8px 12px;
+            }
+        }
+    </style>
+</head>
+<body class="container">
+    <div class="topLeftMenu">
+        <div class="modeMenu">
+            <button class="iconBtn" onclick="toggleModeMenu()">Режим: Обычный</button>
+            <div class="modeList" id="modeList" style="display: none;">
+                <div class="modeItem" onclick="setMode('default')">Обычный</div>
+                <div class="modeItem" onclick="setMode('coding')">Код</div>
+                <div class="modeItem" onclick="setMode('analysis')">Аналитика</div>
+            </div>
+        </div>
+    </div>
+
+    <header class="header">
+        <button class="iconBtn" onclick="toggleSidebar()">Скрыть панель</button>
+        <div class="toolbarRight">
+            <button class="ghostBtn" onclick="toggleTheme()">Сменить тему</button>
+            <div class="helpWrap" onmouseenter="showHelp(true)" onmouseleave="showHelp(false)">
+                <button class="ghostBtn">Помощь</button>
+                <div class="tooltip" id="helpTooltip" style="display: none;">Наведите на «Помощь», чтобы увидеть подсказки по использованию интерфейса: отправляйте сообщения, прикрепляйте файлы, используйте веб-поиск и переключайте режимы.</div>
+            </div>
+        </div>
+    </header>
+
+    <div class="content">
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebarInner">
+                <div class="sidebarHeader">
+                    <button class="primaryBtn" onclick="newChat()">Новый чат</button>
+                    <button class="iconBtn">Корзина</button>
+                </div>
+                <div class="sidebarList">
+                    <div style="color: var(--muted)">Нет чатов</div>
+                </div>
+                <div class="sidebarFooter">
+                    <div style="margin-bottom: 8px;">
+                        <div style="font-weight: 600;">Иван Иванов</div>
+                        <div style="color: var(--muted); font-size: 12px;">Инженер-программист</div>
+                    </div>
+                    <button class="iconBtn" style="width: 100%;">Выйти</button>
+                </div>
+            </div>
+        </aside>
+
+        <section class="chatArea">
+            <div class="messages" id="messages">
+                <!-- Messages will appear here -->
+            </div>
+            <div class="inputBar centered" id="inputBar">
+                <div class="inputContainer">
+                    <input type="text" placeholder="Введите сообщение..." id="messageInput" onkeydown="handleKeyDown(event)">
+                    <div class="inputButtons">
+                        <label class="inputButton" title="Прикрепить файл">
+                            📎
+                            <input type="file" multiple hidden onchange="handleFileUpload(event)">
+                        </label>
+                        <button class="inputButton" id="webSearchBtn" onclick="toggleWebSearch()" title="Веб-поиск">
+                            🔍
+                        </button>
+                    </div>
+                    <button class="sendButton" onclick="sendMessage()" id="sendBtn">
+                        ➤
+                    </button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <button class="webSearchToggle" id="webSearchToggle" onclick="toggleWebSearch()" title="Включить веб-поиск">
+        🔍
+    </button>
+
+    <script>
+        let theme = 'dark';
+        let sidebarOpen = true;
+        let webSearchEnabled = false;
+        let messages = [];
+        let isStreaming = false;
+
+        function toggleTheme() {
+            theme = theme === 'dark' ? 'light' : 'dark';
+            document.body.className = `container ${theme}`;
+        }
+
+        function toggleSidebar() {
+            sidebarOpen = !sidebarOpen;
+            const sidebar = document.getElementById('sidebar');
+            sidebar.style.width = sidebarOpen ? '300px' : '0';
+            document.querySelector('.header button').textContent = sidebarOpen ? 'Скрыть панель' : 'Показать панель';
+        }
+
+        function toggleModeMenu() {
+            const modeList = document.getElementById('modeList');
+            modeList.style.display = modeList.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function setMode(mode) {
+            document.querySelector('.modeMenu button').textContent = `Режим: ${mode}`;
+            document.getElementById('modeList').style.display = 'none';
+        }
+
+        function showHelp(show) {
+            document.getElementById('helpTooltip').style.display = show ? 'block' : 'none';
+        }
+
+        function toggleWebSearch() {
+            webSearchEnabled = !webSearchEnabled;
+            const btn = document.getElementById('webSearchBtn');
+            const toggle = document.getElementById('webSearchToggle');
+            
+            if (webSearchEnabled) {
+                btn.classList.add('active');
+                toggle.classList.add('active');
+                toggle.title = 'Отключить веб-поиск';
+            } else {
+                btn.classList.remove('active');
+                toggle.classList.remove('active');
+                toggle.title = 'Включить веб-поиск';
+            }
+        }
+
+        function newChat() {
+            messages = [];
+            updateMessages();
+            updateInputPosition();
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey && !isStreaming) {
+                sendMessage();
+            }
+        }
+
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (files.length > 0) {
+                console.log('Files uploaded:', files.length);
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const text = input.value.trim();
+            if (!text || isStreaming) return;
+
+            input.value = '';
+            isStreaming = true;
+            document.getElementById('sendBtn').disabled = true;
+
+            // Add user message
+            const userMsg = { role: 'user', content: text };
+            messages.push(userMsg);
+            updateMessages();
+            updateInputPosition();
+
+            // Perform web search if enabled
+            if (webSearchEnabled) {
+                try {
+                    const response = await fetch(`/api/search?q=${encodeURIComponent(text)}`);
+                    const data = await response.json();
+                    if (data.results) {
+                        messages.push({ role: 'system', content: 'Результаты веб-поиска:', results: data.results });
+                        updateMessages();
+                    }
+                } catch (e) {
+                    console.error('Search failed:', e);
+                }
+            }
+
+            // Send to backend
+            try {
+                await fetch('/api/chat/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: 'test', message: text, mode: 'default' })
+                });
+
+                // Simulate streaming response
+                const assistantMsg = { role: 'assistant', content: '' };
+                messages.push(assistantMsg);
+                updateMessages();
+
+                // Simulate token streaming
+                const response = "Это стриминговый ответ от ассистента. ";
+                for (let i = 0; i < response.length; i++) {
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    assistantMsg.content += response[i];
+                    updateMessages();
+                }
+
+                // Add table
+                const tableMsg = { role: 'assistant', content: 'Таблица результатов:\n\nКолонка | Значение\n--- | ---\nA | 1\nB | 2\nC | 3', type: 'table' };
+                messages.push(tableMsg);
+                updateMessages();
+
+            } catch (e) {
+                console.error('Send failed:', e);
+            }
+
+            isStreaming = false;
+            document.getElementById('sendBtn').disabled = false;
+        }
+
+        function updateMessages() {
+            const container = document.getElementById('messages');
+            container.innerHTML = messages.map(msg => {
+                if (msg.results) {
+                    return `
+                        <div style="margin: 8px 0;">
+                            <div style="font-size: 12px; color: var(--muted);">${msg.role}</div>
+                            <div style="font-weight: 600; margin-bottom: 8px;">${msg.content}</div>
+                            ${msg.results.map(r => `
+                                <div style="margin-bottom: 8px;">
+                                    <a href="${r.url}" target="_blank" rel="noreferrer" style="color: var(--accent);">${r.title}</a>
+                                    <div style="color: var(--muted);">${r.snippet}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                }
+                return `
+                    <div style="margin: 8px 0;">
+                        <div style="font-size: 12px; color: var(--muted);">${msg.role}</div>
+                        <div style="white-space: pre-wrap;">${msg.content}</div>
+                    </div>
+                `;
+            }).join('');
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function updateInputPosition() {
+            const inputBar = document.getElementById('inputBar');
+            if (messages.length === 0) {
+                inputBar.classList.add('centered');
+            } else {
+                inputBar.classList.remove('centered');
+            }
+        }
+    </script>
+</body>
+</html>

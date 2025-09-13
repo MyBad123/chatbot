@@ -43,8 +43,9 @@ export const App: React.FC = () => {
   const [modeOpen, setModeOpen] = useState(false)
   const [mode, setMode] = useState(defaultModes[0].id)
   const [uploading, setUploading] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
+  const [webSearchEnabled, setWebSearchEnabled] = useState(false)
   const [searchResults, setSearchResults] = useState<{title:string;url:string;snippet:string}[]|null>(null)
+  const [isStreaming, setIsStreaming] = useState(false)
 
   const rootClass = theme === 'light' ? 'container light' : 'container'
 
@@ -56,11 +57,23 @@ export const App: React.FC = () => {
   },[])
 
   const sendMessage = async () => {
-    if (!input.trim()) return
+    if (!input.trim() || isStreaming) return
     const text = input
     setInput('')
+    setIsStreaming(true)
     const userMsg: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: text }
     setMessages(prev=>[...prev, userMsg])
+    
+    // Perform web search if enabled
+    if (webSearchEnabled) {
+      try {
+        const res = await api.search(text)
+        setSearchResults(res.results)
+      } catch (e) {
+        console.error('Search failed:', e)
+      }
+    }
+    
     await api.send(chatId, text, mode)
     // Start stream
     let assistantId = crypto.randomUUID()
@@ -82,6 +95,7 @@ export const App: React.FC = () => {
         setMessages(prev=>[...prev, { id: crypto.randomUUID(), role: 'assistant', content: tableText, type: 'table' }])
       } else if (chunk.type === 'end') {
         stop()
+        setIsStreaming(false)
       }
     })
   }
@@ -93,10 +107,11 @@ export const App: React.FC = () => {
     try { await api.upload(files) } finally { setUploading(false) }
   }
 
-  const doSearch = async () => {
-    if (!searchQuery.trim()) return
-    const res = await api.search(searchQuery)
-    setSearchResults(res.results)
+  const toggleWebSearch = () => {
+    setWebSearchEnabled(prev => !prev)
+    if (webSearchEnabled) {
+      setSearchResults(null)
+    }
   }
 
   const toggleTheme = () => setTheme(t=>t==='dark'?'light':'dark')
@@ -157,7 +172,7 @@ export const App: React.FC = () => {
           </div>
         </aside>
 
-        <section className="chatArea">
+        <section className="chatArea" style={{ position: 'relative' }}>
           <div className="messages">
             {messages.map(m=> (
               <div key={m.id} style={{ margin: '8px 0' }}>
@@ -177,23 +192,50 @@ export const App: React.FC = () => {
               </div>
             )}
           </div>
-          <div className="inputBar">
-            <input type="text" placeholder="Введите сообщение..." value={input} onChange={e=>setInput(e.target.value)} onKeyDown={e=>{ if (e.key==='Enter' && !e.shiftKey) sendMessage() }} />
-            <label className="iconBtn">
-              Прикрепить файл
-              <input type="file" multiple hidden onChange={onUpload} />
-            </label>
-            <button className="primaryBtn" onClick={sendMessage} disabled={!input.trim()}>Отправить</button>
+          <div className={`inputBar ${messages.length === 0 ? 'centered' : ''}`}>
+            <div className="inputContainer">
+              <input 
+                type="text" 
+                placeholder="Введите сообщение..." 
+                value={input} 
+                onChange={e=>setInput(e.target.value)} 
+                onKeyDown={e=>{ if (e.key==='Enter' && !e.shiftKey && !isStreaming) sendMessage() }}
+                disabled={isStreaming}
+              />
+              <div className="inputButtons">
+                <label className="inputButton" title="Прикрепить файл">
+                  📎
+                  <input type="file" multiple hidden onChange={onUpload} disabled={isStreaming} />
+                </label>
+                <button 
+                  className={`inputButton ${webSearchEnabled ? 'active' : ''}`}
+                  onClick={toggleWebSearch}
+                  title="Веб-поиск"
+                  disabled={isStreaming}
+                >
+                  🔍
+                </button>
+              </div>
+              <button 
+                className="sendButton" 
+                onClick={sendMessage} 
+                disabled={!input.trim() || isStreaming}
+                title="Отправить"
+              >
+                ➤
+              </button>
+            </div>
           </div>
         </section>
       </div>
 
-      <div className="webSearchBtn">
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input type="text" placeholder="web-поиск" value={searchQuery} onChange={e=>setSearchQuery(e.target.value)} style={{ flex: 1, padding: 8, borderRadius: 8, border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)' }} />
-          <button className="iconBtn" onClick={doSearch}>Искать</button>
-        </div>
-      </div>
+      <button 
+        className={`webSearchToggle ${webSearchEnabled ? 'active' : ''}`}
+        onClick={toggleWebSearch}
+        title={webSearchEnabled ? 'Отключить веб-поиск' : 'Включить веб-поиск'}
+      >
+        🔍
+      </button>
     </div>
   )
 }

@@ -66,8 +66,97 @@ button { cursor: pointer; }
 
 .chatArea { display: grid; grid-template-rows: 1fr auto; height: 100%; }
 .messages { padding: 12px; overflow: auto; }
-.inputBar { display: flex; gap: 8px; border-top: 1px solid var(--border); padding: 10px; background: var(--card); }
-.inputBar input[type="text"] { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); background: transparent; color: var(--text); }
+.inputBar { 
+  display: flex; 
+  gap: 8px; 
+  border-top: 1px solid var(--border); 
+  padding: 10px; 
+  background: var(--card); 
+  position: relative;
+}
+
+.inputBar.centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-top: none;
+  background: transparent;
+  padding: 0;
+}
+
+.inputContainer {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  padding: 8px 12px;
+  min-height: 56px;
+}
+
+.inputContainer input[type="text"] {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text);
+  outline: none;
+  padding: 8px 12px;
+  font-size: 16px;
+}
+
+.inputContainer input[type="text"]::placeholder {
+  color: var(--muted);
+}
+
+.inputButtons {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+.inputButton {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.inputButton:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text);
+}
+
+.inputButton.active {
+  background: var(--accent);
+  color: white;
+}
+
+.sendButton {
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-left: 8px;
+}
+
+.sendButton:hover {
+  background: #5a8eff;
+}
+
+.sendButton:disabled {
+  background: var(--muted);
+  cursor: not-allowed;
+}
 
 .iconBtn { background: transparent; border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; }
 .primaryBtn { background: var(--accent); color: white; border: 0; border-radius: 8px; padding: 8px 12px; }
@@ -83,8 +172,32 @@ button { cursor: pointer; }
 .modeItem { padding: 8px; border-radius: 6px; }
 .modeItem:hover { background: rgba(255,255,255,0.06); }
 
-.webSearchBtn { position: absolute; right: 16px; bottom: 86px; }
+.webSearchToggle { 
+  position: absolute; 
+  right: 16px; 
+  bottom: 16px; 
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.webSearchToggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.webSearchToggle.active {
+  background: var(--accent);
+  color: white;
+}
 
 @media (max-width: 960px) {
-  .webSearchBtn { position: static; margin: 8px 12px; }
+  .webSearchToggle { 
+    position: static; 
+    margin: 8px 12px; 
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
 }
